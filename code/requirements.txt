@@ -1,0 +1,3 @@
+# Core run needs only the Python standard library.
+# Optional: enables the upscaled OCR passes.
+Pillow>=10

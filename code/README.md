@@ -2,22 +2,47 @@
 
 Deterministic, evidence-grounded audit agent for the HackerRank Orchestrate (October 2026) challenge.
 It decides for every request whether the deletion is `COMPLETE`, `INCOMPLETE` or `NOT_APPLICABLE` and emits the
-ordered findings / remediation / verification steps. **No LLM or network call is made**: a full run is offline,
-reproducible and costs zero tokens (see `evaluation/usage_report.md`).
+ordered findings / remediation / verification steps. The default run makes **no LLM or network call**: it is offline,
+reproducible and costs zero tokens (see `evaluation/usage_report.md`). An optional vision-model layer exists but is off unless an API key is set.
 
-## Setup and run
+## Installation
+
+Requirements: **Python 3.10+** and the repository layout `dataset/` next to `code/` (the dataset is not shipped in `code.zip`).
+The code uses only the Python standard library, so there is nothing to `pip install` for the core run.
+
+Optional tools (the run still succeeds without them, but screenshots/PDFs are then not read and some findings are lost):
 
 ```bash
-# Python 3.10+, standard library only. Optional OCR/PDF tools for the screenshots and PDFs:
-#   pdftotext (poppler-utils) and tesseract. If they are missing those files are skipped, not fatal.
+# Debian/Ubuntu
+sudo apt-get install -y tesseract-ocr poppler-utils     # OCR for screenshots, text extraction for PDFs
+# macOS
+brew install tesseract poppler
+# Windows: install Tesseract (UB Mannheim build) and Poppler, and add both to PATH
+
+pip install -r code/requirements.txt                    # optional: Pillow, enables the upscaled OCR passes
+```
+
+Optional vision model (off by default; read from the environment only, never stored in files):
+
+```bash
+export ANTHROPIC_API_KEY=...        # enables the VLM transcription layer
+export GHOST_VLM_MODEL=claude-sonnet-5-5   # optional model override
+export GHOST_VLM=0                  # force it off even if a key is set
+```
+
+## Run
+
+```bash
 python3 code/main.py                       # reads dataset/, writes ./output.csv (518 rows)
-python3 code/evaluation/validate_output.py # schema / ordering / evidence-time checks on output.csv
+python3 code/evaluation/validate_output.py # schema / ordering / evidence-time / completeness checks on output.csv
 python3 code/evaluation/evaluate.py -v     # accuracy against dataset/sample_output.csv
 python3 code/evaluation/evaluate.py --requests code/evaluation/custom_requests.csv \
         --labels code/evaluation/custom_labels.csv     # extra cases created for this project
+python3 code/evaluation/make_reports.py    # regenerates evaluation_report.md and usage_report.md
 ```
 
 A clean run takes about 45 s (almost all of it OCR of 11 screenshots and parsing 94 evidence files).
+Expected result: 518 rows (355 INCOMPLETE, 153 COMPLETE, 10 NOT_APPLICABLE), validator `0 problems`.
 
 ## Architecture (`code/ghostaudit/`)
 

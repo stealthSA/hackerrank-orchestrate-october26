@@ -173,3 +173,23 @@ branch=main
 repo_root=/home/claude/hackerrank-orchestrate-october26
 worktree=main
 parent_agent=none
+
+## [2026-10-25T11:18:00+02:00] Installation instructions in README
+
+User Prompt (verbatim, secrets redacted):
+does the code have installation insrtuctions?
+
+Agent Response Summary:
+Checked code/README.md: it had a short setup note but no install commands and a stale "no network call" claim. Added an Installation section (Python version, optional tesseract/poppler/Pillow, optional API key variables), a Run section and expected results; added code/requirements.txt; rebuilt the zip.
+
+Actions:
+* Edited code/README.md; created code/requirements.txt
+* Rebuilt code.zip and pushed
+
+Context:
+tool=Claude Code
+model=claude-sonnet-5-5
+branch=main
+repo_root=/home/claude/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
