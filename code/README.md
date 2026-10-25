@@ -17,7 +17,7 @@ python3 code/evaluation/evaluate.py --requests code/evaluation/custom_requests.c
         --labels code/evaluation/custom_labels.csv     # extra cases created for this project
 ```
 
-A clean run takes about 25 s (almost all of it OCR of 11 screenshots and parsing 94 evidence files).
+A clean run takes about 45 s (almost all of it OCR of 11 screenshots and parsing 94 evidence files).
 
 ## Architecture (`code/ghostaudit/`)
 
@@ -44,3 +44,17 @@ Key rules implemented (all from `problem_statement.md` / `AGENTS.md`):
 Some links cannot be proven from the supplied data (e.g. two accounts deleted at nearly the same time for two
 subjects with no identifier on either). Those are resolved by a deterministic tie-break and counted at the end
 of `main.py`'s output. See `evaluation/evaluation_report.md` for the measured impact.
+
+
+## Hybrid reading and self-audit (added)
+
+* `ghostaudit/vision.py` reads screenshots/PDFs in three layers: (1) local multi-pass OCR ensemble (tesseract on the
+  original and a 2x upscaled copy, psm 6 and 11); (2) an **optional** vision-language model transcription, enabled only
+  when `ANTHROPIC_API_KEY` is set (`GHOST_VLM_MODEL` selects the model, default `claude-sonnet-5-5`; `GHOST_VLM=0`
+  disables it). Results are cached in `code/.vision_cache/` and token usage is written to
+  `code/evaluation/run_usage.json` for `usage_report.md`; (3) identifier snapping of noisy e-mails / resource ids to
+  the closest known value from the dataset tables.
+* `ghostaudit/selfcheck.py` audits every answer against the completeness conditions (policy action per category,
+  finding -> remediation -> verification closure, evidence-backed COMPLETE rows). `main.py` prints the issue count;
+  `evaluation/validate_output.py` fails on any issue.
+* Everything works without a key or network; the deterministic path produces the submitted `output.csv`.

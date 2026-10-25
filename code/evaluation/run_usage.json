@@ -1,0 +1,12 @@
+{
+ "vlm": {
+  "calls": 0,
+  "cache_hits": 0,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "models": {}
+ },
+ "requests": 518,
+ "snapped": 28,
+ "selfcheck_issues": 0
+}

@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 from ghostaudit.common import ROOT, parse_ts, read_csv  # noqa: E402
 from ghostaudit.engine import OP_META, OP_ORDER, PHASES  # noqa: E402
 from ghostaudit.pipeline import case_key  # noqa: E402
+from ghostaudit.selfcheck import audit as selfaudit  # noqa: E402
 
 FIELDS = {"step_no", "phase", "system_id", "resource_id", "operation", "state", "evidence_id"}
 
@@ -68,8 +69,7 @@ def validate(path, requests="deletion_requests.csv"):
                 errs.append(f"{cid}: finding without evidence")
             if st == "COMPLETE" and s["phase"] != "VERIFICATION":
                 errs.append(f"{cid}: COMPLETE contains {s['phase']}")
-        if st == "INCOMPLETE" and not any(s["phase"] == "FINDING" for s in steps):
-            errs.append(f"{cid}: INCOMPLETE without findings")
+        errs += selfaudit(cid, st, steps)
     return errs, len(rows)
 
 

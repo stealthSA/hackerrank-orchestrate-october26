@@ -12,6 +12,8 @@ import sqlite3
 import subprocess
 from dataclasses import dataclass, field
 
+from . import vision
+
 from .common import (DATASET, EMAIL_RE, HASH_RE, RID_RE, RTYPES, USER_RE,
                      parse_ts, read_csv, rtype)
 
@@ -158,6 +160,7 @@ class EvidenceStore:
 
     # ---------------------------------------------------------------- build
     def load(self) -> "EvidenceStore":
+        deferred = []
         for row in read_csv("evidence_files.csv"):
             self.files[row["file_id"]] = row
             path = os.path.join(DATASET, row["file_path"])
@@ -172,11 +175,22 @@ class EvidenceStore:
                 elif ext == ".txt":
                     self._txt(row, path)
                 elif ext == ".pdf":
-                    self._doc(row, _pdf_text(path))
+                    deferred.append((row, _pdf_text(path)))
                 elif ext in (".png", ".jpg", ".jpeg"):
-                    self._doc(row, _ocr_text(path))
+                    deferred.append((row, vision.read_image(path)))
             except Exception as exc:  # keep going; evidence is best-effort
                 print(f"[evidence] {row['file_id']} {row['file_path']}: {exc}")
+        # documents/screenshots are read last: their noisy identifiers are snapped to the vocabulary
+        # known from the structured evidence and the dataset tables
+        emails, rids = vision.known_vocabulary()
+        rids |= {o.rid for o in self.obs}
+        snapper = vision.Snapper(emails, rids)
+        for row, text in deferred:
+            try:
+                self._doc(row, snapper.snap(text))
+            except Exception as exc:
+                print(f"[evidence] {row['file_id']} {row['file_path']}: {exc}")
+        self.snapped = snapper.fixed
         for o in self.obs:
             self.by_rid.setdefault(o.rid, []).append(o)
         return self
@@ -538,7 +552,7 @@ def _pdf_text(path: str) -> str:
         return ""
 
 
-def _ocr_text(path: str) -> str:
+def _ocr_text_legacy(path: str) -> str:
     try:
         return subprocess.run(["tesseract", path, "-"], capture_output=True, text=True,
                               timeout=120).stdout
