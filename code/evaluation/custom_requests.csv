@@ -1,0 +1,6 @@
+case_id,email,requested_at,reported_status,reported_at,audit_at,request_text
+custom_01,n.petrescu@yahoo.com,2026-08-31T15:42:00Z,COMPLETE,2026-09-02T10:08:00Z,2026-09-18T12:25:00Z,I used this Yahoo address before changing the email on my account. Please remove records linked to both the old and current addresses.
+custom_02,nadia.petrescu@yahoo.com,2026-08-31T15:42:00Z,COMPLETE,2026-09-02T10:08:00Z,2026-09-18T12:25:00Z,I used this Yahoo address before changing the email on my account. Please remove records linked to both the old and current addresses.
+custom_03,amina.elmasri@gmail.com,2026-08-18T09:14:00Z,COMPLETE,2026-08-20T16:42:00Z,2026-09-03T11:30:00Z,アカウントの完全な削除を依頼します。プライバシー手続きに従い、関連する個人データも削除してください。
+custom_04,mateo.rios@outlook.com,2026-08-21T18:06:00Z,PARTIALLY_COMPLETE,2026-08-22T07:25:00Z,2026-09-04T15:00:00Z,No quiero eliminar mi cuenta; solo necesito una copia de mis datos personales.
+custom_05,leila.haddad@yahoo.com,2026-08-27T14:17:00Z,COMPLETE,2026-08-28T09:03:00Z,2026-09-08T13:40:00Z,Please keep my account active and send me copies of my invoices. I am not asking for deletion.
